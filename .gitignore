@@ -1,2 +1,17 @@
 __pycache__/
 .venv/
+# macOS metadata
+.DS_Store
+
+# Python coverage data
+.coverage
+.coverage.*
+htmlcov/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
