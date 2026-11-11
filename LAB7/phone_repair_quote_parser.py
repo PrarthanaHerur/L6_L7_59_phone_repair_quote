@@ -1,29 +1,75 @@
 def mask_imei(imei):
     """
-    Removes dashes and spaces, then hides all but the last four digits.
-    Assumes imei is a non-empty string.
+    Removes dashes and spaces, then hides all but the last four characters.
+    Handles invalid and unexpected inputs safely.
     """
+    if not isinstance(imei, str):
+        return ""
+
     imei = imei.replace('-', '').replace(' ', '')
-    return '*' * (len(imei) - 4) + imei[-4:]
+
+    if not imei:
+        return ""
+
+    return '*' * max(0, len(imei) - 4) + imei[-4:]
+
 
 def parse_parts_order(text):
     """
     Parses 'screen x1; battery x2' into a {part: quantity} dictionary.
-    Assumes every item is written as 'part xQTY'.
+    Invalid entries are safely ignored.
     """
     order = {}
+
+    if not isinstance(text, str) or not text.strip():
+        return order
+
     for item in text.split(';'):
-        part, qty = item.split('x')
-        order[part.strip()] = int(qty)
+        item = item.strip()
+
+        if not item or 'x' not in item:
+            continue
+
+        part, qty = item.rsplit('x', 1)
+
+        part = part.strip()
+        qty = qty.strip()
+
+        if not part or not qty:
+            continue
+
+        try:
+            quantity = int(qty)
+
+            if quantity <= 0:
+                continue
+
+            order[part] = quantity
+
+        except (ValueError, TypeError):
+            continue
+
     return order
+
 
 def parse_model(text):
     """
     Splits 'Brand Model name' into a (brand, model) tuple.
-    Assumes text has at least two words.
+    Handles empty, invalid and unexpected inputs safely.
     """
-    brand, model = text.strip().split(' ', 1)
-    return brand.title(), model.strip()
+    if not isinstance(text, str):
+        return "", ""
+
+    words = text.strip().split()
+
+    if len(words) < 2:
+        return "", ""
+
+    brand = words[0].title()
+    model = " ".join(words[1:])
+
+    return brand, model
+
 
 def main():
     print("==== Running mask_imei ====")
@@ -37,6 +83,7 @@ def main():
     print("\n==== Running parse_model ====")
     value = input("Enter the phone brand and model (e.g. Samsung Galaxy S23): ")
     print("Brand and model:", parse_model(value))
+
 
 if __name__ == "__main__":
     main()
